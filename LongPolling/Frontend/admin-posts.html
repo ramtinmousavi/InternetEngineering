@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="bootstrap.css">
+    <link rel="stylesheet" href="admin.html">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <style>
+        body {
+            background-image: url("Posts-Background.png");
+            background-repeat:no-repeat;
+            background-size:cover;
+        }
+        .card-class{
+            margin-top: 8%; background-color: rgb(230, 230, 230);
+
+        }
+    </style>
+</head>
+<body>
+   <!-- Navbar html tags -->
+    <div class="bg-image"></div>
+    <img class="body" >
+    <nav class="navbar navbar-inverse" style="margin: -1% 0%;">
+      <div class="container-fluid">
+        <div class="navbar-header"  style="margin-left: -3%;" >
+          <a class="navbar-brand" href="#" style="font-size: 30px;"><strong>Long Polling</strong></a>
+        </div>
+        <ul class="nav navbar-nav" style="display: inline-block;">
+          <li class="active" style="font-size: 20px;" ><a href="#"><strong>Posts</strong></a></li>
+          <li class="nav-text"><a href="#"><strong>Profile</strong></a></li>
+          <li class="nav-text"><a href="#"><strong>About US</strong></a></li>
+        </ul>
+        <form class="navbar-form navbar-left" style="margin-left: 40%; display:inline-block;">
+          <div class="input-group" >
+            <input type="text" class="form-control" placeholder="Search" name="search">
+            <div class="input-group-btn">
+              <button class="btn btn-default" type="submit">
+                  <i class="glyphicon glyphicon-search"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </nav>
+    <!-- Posts are shown as cards this part will be filled by js codes shown in script tag -->
+    <div id="cards"></div>
+    <!-- Modal html tags used for edit or delete posts -->
+    <div class="container">
+      <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content" style="width: 215%; margin: 14% -46%;">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="container">
+                <form>
+                  <div class="form-group" style="margin: 1% 6%; border-radius: 37px; width: 60%;">
+                    <label for="usr" style="font-size: 180%; color: rgb(0, 61, 153);" >Title:</label>
+                    <input type="text" class="form-control" id="title">
+                  </div>
+                </form>
+                <form >
+                  <div class="form-group myForm" style="margin: 4% 6%; margin-bottom: 9%;">
+                      <label for="comment" style="font-size: 180%;  color: rgb(0, 61, 153);"><strong>Description:</strong></label>
+                      <textarea class="form-control" style="border-radius: 37px; height: 20%; position: absolute; width: 63%" rows="5" id="description" name="text"></textarea>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default btn-primary" onclick="update_post()" style="font-size: 129%; margin: 0% 3%;" data-dismiss="modal">Save</button>
+            </div>
+          </div>  
+        </div>
+      </div> 
+    </div>
+</body>
+ 
+<script>
+  var editId, sub, posts_list;
+  // Send XMLHttpRequest request to get posts from server and make html and css codes for each of them
+  function poll_posts(){
+    // Send XMLHttpRequest
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', 'http://127.0.0.1:5000/api/posts');
+    xhr.send();
+    // if the response has been completely loaded do:
+    xhr.onload = function() {
+    // Pars Json taken from server which contains title and description of posts
+    var obj = JSON.parse(xhr.response);
+    posts_list = obj.posts;
+    
+    // Create HTML_CSS parts for each post and fill them using posts details
+    var i;
+    for (i = 0; i < posts_list.length; i++) {
+      var container = document.createElement('div');
+      container.setAttribute('class', 'container');
+      container.setAttribute('id', posts_list[i].id);
+      var card = document.createElement('div');
+      card.setAttribute('class', 'card mx-auto card-class');
+      var card_body = document.createElement('div');
+      card_body.setAttribute('class', 'card-body');
+      var titlesh = document.createElement('h3');
+      titlesh.innerHTML = posts_list[i].title;
+      var textesh = document.createElement('p');
+      textesh.innerHTML = posts_list[i].description;
+      var like = document.createElement('i');
+      like.setAttribute('class', 'fa like_icon fa-thumbs-up');
+      like.setAttribute('style', 'font-size: 25px;');
+      var like_text = document.createElement('p');
+      like_text.setAttribute('class', 'like-text');
+      like_text.innerHTML = "5 Likes";
+      var comment = document.createElement('i');
+      comment.setAttribute('class', 'fa comment-icon fa-comments-o');
+      comment.setAttribute('style', 'font-size: 30px;');
+      var comment_text = document.createElement('p');
+      comment_text.setAttribute('class', 'like-text');
+      comment_text.innerHTML = "1 Comments";
+      var trash = document.createElement('i');
+      trash.setAttribute('class', 'fa trash-icon fa-trash');
+      trash.setAttribute('style', 'font-size: 23px;');
+      trash.setAttribute('name',posts_list[i].id);
+      trash.setAttribute('onclick','delete_post(this)');
+      var edit = document.createElement('i');
+      edit.setAttribute('class', 'fa edit-icon fa-pencil-square-o');
+      edit.setAttribute('style', 'font-size: 23px');
+      edit.setAttribute('name',posts_list[i].id);
+      edit.setAttribute('onclick','edit_post(this)');
+
+      document.getElementById('cards').appendChild(container); 
+      container.appendChild(card);
+      card.appendChild(card_body);
+      card_body.appendChild(titlesh);
+      card_body.appendChild(textesh);
+      card_body.appendChild(like);
+      card_body.appendChild(like_text);
+      card_body.appendChild(comment);
+      card_body.appendChild(comment_text);
+      card_body.appendChild(trash);
+      card_body.appendChild(edit);
+
+    }
+  }     
+}
+
+  // If the server has send CHANGED status call poll_posts to make their html-css codes
+  function poll_changes(){
+    let xhr3 = new XMLHttpRequest();
+    xhr3.open('GET', 'http://127.0.0.1:5000/api/poll');
+    xhr3.send();
+    xhr3.onreadystatechange = function() {
+      if (xhr3.readyState === 4) {
+        var obj = JSON.parse(xhr3.response);
+        if(obj.status == "changed"){
+          var e = document.getElementById('cards');  
+          var child = e.lastElementChild;  
+          while (child) { 
+              e.removeChild(child); 
+              child = e.lastElementChild; 
+          } 
+          poll_posts();
+        }
+      }
+      // CALLBACK 
+      poll_changes(); 
+    }
+  }
+  poll_posts();
+  poll_changes();
+
+  // Send request to deletePost api with the post id to delete it on trash icon click
+  function delete_post(trash) {
+    var trashId = eval(trash.getAttribute('name'));
+    let xhr2 = new XMLHttpRequest();
+    url = 'http://127.0.0.1:5000/api/deletePost/' + trashId;
+    xhr2.open('GET', url);
+    xhr2.send();
+  }
+
+  //Open MODAL and preview current information of post on edit icon click
+  function edit_post(edit){
+    editId = eval(edit.getAttribute('name'));
+    $("#myModal").modal();
+    for (i = 0; i < posts_list.length; i++) {
+      if(posts_list[i].id == editId){
+          sub = posts_list[i];
+      }
+    }
+    document.getElementById('title').value = sub.title;
+    document.getElementById('description').innerHTML = sub.description;
+  }
+
+  // Send request to editPost with post id and new changes to change its information on edit icon click
+  function update_post() {
+    url = 'http://127.0.0.1:5000/api/editPost/' + editId;
+    axios.post(url, {
+    title: document.getElementById("title").value,
+    description: document.getElementById("description").value
+  });
+  }
+
+</script>
+</html>

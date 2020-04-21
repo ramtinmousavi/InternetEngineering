@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="bootstrap.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        body{
+            background-image: url("Post-Background.png");
+            background-repeat:no-repeat;
+            background-size:cover;
+        }
+    </style>
+
+</head>
+<body>
+    <!-- Area boxes for adding title, description and post them -->
+    <div class="container">
+            <form>
+                <div class="form-group" style="margin: 10% 6%; border-radius: 37px; width: 60%;">
+                    <label for="usr" style="font-size: 180%; color: rgb(0, 61, 153);" >Title:</label>
+                      <input type="text" class="form-control" id="title">
+                    </div>
+                <button type="submit" class="btn btn-primary myBtn" style="font-size: 169%; margin: 21% 38%; width: 14%; height: 5%; border-radius: 22px; margin: -8% 41%; display: inline-block; position: absolute;" onclick="add_post()"><strong>Post it !</strong></button>
+            </form>
+        <form>
+            <div class="form-group myForm" style="margin: -6% 6%;">
+                <label for="comment" style="font-size: 180%;  color: rgb(0, 61, 153);"><strong>Write something:</strong></label>
+                <textarea class="form-control" style="border-radius: 37px; height: 20%; position: absolute; width: 52%" rows="5" id="description" name="text"></textarea>
+            </div>
+        </form>
+        <a href="admin.html" class="btn btn-danger" style="text-decoration-line: none; margin:-23% -20%; display: block; width: 10%;" ><strong>Back</strong></a>
+    </div>
+</body>
+<script>
+    axios({
+  url: 'http://127.0.0.1:5000/api/addPost',
+  method: 'get'
+})
+
+// Send new post using POST method
+function add_post() {
+    axios.post('http://127.0.0.1:5000/api/addPost', {
+  title: document.getElementById("title").value,
+  description: document.getElementById("description").value
+});
+}
+
+</script>
